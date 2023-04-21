@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Stock Price Notifier</title>
+        <link rel="stylesheet" href="../static/styles.css" />
+    </head>
+    <body>
+        <main>
+            <form action="" class="stock-form">
+                <h1 class="title">Stock Price Notifier</h1>
+                <div class="select-menu-wrapper form-element">
+                    <label for="dropdown-selector" class="form-header">Stock Ticker Symbol:</label>
+                    <select id="dropdown-selector" name="dropdown-selector">
+                        <option value="META">META</option>
+                        <option value="GSPC">GSPC</option>
+                        <option value="TSLA">TSLA</option>
+                    </select><br><br>
+                </div>
+                <!--<div class="stock-ticker-wrapper form-element">
+                    <label for="stock-ticker">Stock Ticker Symbol: </label>
+                    <input type="text" name="stock-ticker" id="stock-ticker" value="META"/>
+                </div>-->
+                <div class="threshold-wrapper form-element">
+                    <label for="stock-price-threshold" class="form-header"
+                        >Stock Price Threshold: </label
+                    >
+                    <input
+                        type="text"
+                        name="stock-price-threshold"
+                        id="stock-price-threshold"
+                        value="1000"
+                    />
+                </div>
+                <div class="frequency-wrapper form-element">
+                    <label for="radio-input1" class="form-header">Frequency: </label>
+                    <br />
+                    <input
+                        type="radio"
+                        id="hour"
+                        name="radio-input1"
+                        value="hour"
+                        checked
+                    />
+                    <label for="hour">Hourly</label><br />
+                    <input
+                        type="radio"
+                        id="day"
+                        name="radio-input1"
+                        value="day"
+                    />
+                    <label for="day">Daily</label>
+                </div>
+                <div class="notification-wrapper form-element">
+                    <label for="radio-input2" class="form-header">Notification Mode: </label>
+                    <br />
+                    <input
+                        type="radio"
+                        id="email"
+                        name="radio-input2"
+                        value="email"
+                        checked
+                    />
+                    <label for="email">Email</label><br />
+                    <input
+                        type="radio"
+                        id="message"
+                        name="radio-input2"
+                        value="message"
+                    />
+                    <label for="message">Text Message</label>
+                </div>
+                <button type="submit" class="form-element submit-btn">Get Notified</button>
+            </form>
+        </main>
+    </body>
+</html>
