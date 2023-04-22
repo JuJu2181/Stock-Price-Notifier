@@ -1,5 +1,5 @@
 # This file will contain some utility functions that will be used in the main file
-from config import *
+from models.config import *
 # to send api requests to the web
 import requests
 # for sending emails 
@@ -201,7 +201,7 @@ def send_notification(symbol,threshold,currentPrice,subscriber_email,subscriber_
 
 # connecting to database 
 def get_db_connection():
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect('./database.db')
     conn.row_factory = sqlite3.Row
     return conn
 

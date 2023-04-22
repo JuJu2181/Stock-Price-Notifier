@@ -1,10 +1,10 @@
 # For creating database for subscription entries and intializing it with some values
 import sqlite3
 
-connection = sqlite3.connect('database.db')
+connection = sqlite3.connect('./database.db')
 
 # Read schema
-with open('schema.sql') as f:
+with open('./models/schema.sql') as f:
     connection.executescript(f.read())
     
 cur = connection.cursor()

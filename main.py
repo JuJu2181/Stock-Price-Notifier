@@ -1,8 +1,8 @@
 # for backend
 from flask import Flask
 
-from utils import *
-from routes import blueprint
+from models.utils import *
+from routes.routes import blueprint
 
 import asyncio 
 import threading

@@ -1,8 +1,8 @@
 # This file will contain controllers for file 
 from flask import Flask, render_template, request 
 
-from utils import *
-from config import *
+from models.utils import *
+from models.config import *
 
 # main home page
 def index():

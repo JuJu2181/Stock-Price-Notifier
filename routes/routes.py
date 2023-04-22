@@ -1,6 +1,6 @@
 # Routes for the application
 from flask import Blueprint
-from controllers import index,add_subscription
+from controllers.controllers import index,add_subscription
 
 blueprint = Blueprint('blueprint', __name__, template_folder="/templates")
 
