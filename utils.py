@@ -13,6 +13,8 @@ import schedule
 import time 
 # for fetching data from yahoo finance
 import yfinance as yf
+# for twilio 
+from twilio.rest import Client
 
 # function to fetch data from api
 def fetch_data_from_api(symbol="TSLA"):
@@ -65,7 +67,71 @@ def fetch_data(symbol="TSLA"):
     return currentPrice
     
 # function to send notification
-def send_notification(symbol, threshold, currentPrice, subscriber_email, notification_mode="email"):
+def send_mail(symbol, threshold, currentPrice, subscriber_email,email_type="price_update"):
     # sender's email
-    sender_mail = SENDER_MAIL
-    sender_pwd = SENDER_PWD
+    sender = SENDER_MAIL
+    # receiver's email
+    recipients = [subscriber_email]
+    # Email Content 
+    if email_type == "price_update":
+        subject = f"Stock Price Alert for {symbol}"
+        body = f"""
+        <h2> Notification for {symbol} </h2>
+        <p>Current Price of {symbol} is {currentPrice}. It has crossed the threshold value of {threshold} set by you.</p>
+        <br>
+        This is the Way ✌🏻🕊️
+        """
+    elif email_type == "new_entry":
+        subject = f"Subscription Added for {symbol}"
+        body = f"""
+        <p>Dear Customer, you have successfully added subscription for {symbol}. Your current price threshold is {threshold}. You will get notified if the current price exceeds this threshold.</p>
+        <br>
+        This is the Way ✌🏻🕊️
+        """
+    # using MIME on body to send html content
+    msg = MIMEText(body, 'html')
+    msg['Subject'] = subject
+    msg['From'] = sender
+    # for sending to multiple recipients
+    msg['To'] = ', '.join(recipients)
+    # Setup SMTP server 
+    smtp_server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+    smtp_server.login(SENDER_MAIL,SENDER_PWD)
+    smtp_server.sendmail(sender,recipients,msg.as_string())
+    smtp_server.quit()
+    print(f"Email sent successfully to {subscriber_email}")
+    
+# function to send message
+def send_message(symbol, threshold, currentPrice, subscriber_number,msg_type="price_update"):
+    # set up twilio api
+    client = Client(TWILIO_SID,TWILIO_AUTH_TOKEN)
+    # message when price is updated and exceeds threshold
+    if msg_type == "price_update":
+        message = client.messages.create(
+            from_=TWILIO_NUMBER,
+            body=f"Current Price of {symbol} is {currentPrice}. It has crossed the threshold value of {threshold} set by you.\n~ This is the Way",
+            to='+977'+subscriber_number  
+        )
+    # Default message when user adds new entry
+    elif msg_type == "new_entry":
+        message = client.messages.create(
+            from_=TWILIO_NUMBER,
+            body=f"Dear Customer, you have successfully added subscription for {symbol}. Your current price threshold is {threshold}. You will get notified if the current price exceeds this threshold.\n~ This is the Way",
+            to='+977'+subscriber_number  
+        )
+    print(f"Message sent successfully to {subscriber_number}")
+
+# function to send notification
+def send_notification(symbol,threshold,currentPrice,subscriber_email,subscriber_number,notification_mode="email",notification_type="price_update"):
+    if notification_mode == "email":
+        # send email for new entry
+        send_mail(symbol,threshold,currentPrice,subscriber_email,notification_type)
+    elif notification_mode == "text-msg":
+        # send message for new entry
+        send_message(symbol,threshold,currentPrice,subscriber_number,notification_type)
+
+
+# def schedule(frequency):
+#     if frequency == "minutely":
+#         schedule.every(1).minutes.do(main)
+    
