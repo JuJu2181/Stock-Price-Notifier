@@ -13,5 +13,11 @@ This is a simple project where user can enter stock ticker symbol and set a thre
 - yfinance
 - Twilio
 
+## Demo Video
+
+
+https://user-images.githubusercontent.com/43902648/233772114-beb452c7-b005-41ab-8ada-c50282de1aee.mp4
+
+
 ### Developed By:
 Anish Shilpakar
