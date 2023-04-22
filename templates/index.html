@@ -1,15 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Stock Price Notifier</title>
-        <!--<link rel="stylesheet" href="{{ url_for('static',filename='styles.css') }}" />-->
-        <link rel="stylesheet" href="../static/styles.css" />
-    </head>
-    <body>
-        <main>
+{%extends "layout/base.html"%}
+
+{%block title%}Home{%endblock%}
+
+{%block content%}
             <form action="/add_subscription" class="stock-form" method="POST">
                 <h1 class="title">Stock Price Notifier</h1>
                 <div class="form-group">
@@ -18,7 +11,7 @@
                 </div>
                 <div class="form-group">
                     <label for="subscriber-phone" class="form-header">Mobile Number:</label>
-                    <input type="text" id="subscriber-phone" name="subscriber-phone" placeholder="XXXXXXXXXX">
+                    <input type="text" id="subscriber-phone" name="subscriber-phone" placeholder="+977-XXXXXXXXXX">
                 </div>
                 <div class="form-group">
                     <label for="stock-ticker-symbol" class="form-header">Stock ticker symbol:</label>
@@ -45,6 +38,4 @@
                 </div>
                 <button type="submit" class="submit-btn">Get Notified</button>
             </form>
-        </main>
-    </body>
-</html>
+{%endblock%}

@@ -15,6 +15,8 @@ import time
 import yfinance as yf
 # for twilio 
 from twilio.rest import Client
+# for database 
+import sqlite3
 
 # function to fetch data from api
 def fetch_data_from_api(symbol="TSLA"):
@@ -67,7 +69,7 @@ def fetch_data(symbol="TSLA"):
     return currentPrice
     
 # function to send notification
-def send_mail(symbol, threshold, currentPrice, subscriber_email,email_type="price_update"):
+def send_mail(symbol, threshold, currentPrice, subscriber_email, frequency, email_type="price_update"):
     # sender's email
     sender = SENDER_MAIL
     # receiver's email
@@ -84,7 +86,7 @@ def send_mail(symbol, threshold, currentPrice, subscriber_email,email_type="pric
     elif email_type == "new_entry":
         subject = f"Subscription Added for {symbol}"
         body = f"""
-        <p>Dear Customer, you have successfully added subscription for {symbol}. Your current price threshold is {threshold}. You will get notified if the current price exceeds this threshold.</p>
+        <p>Dear Customer, you have successfully added {frequency} subscription for {symbol}. Your current price threshold is {threshold}. You will get notified if the current price exceeds this threshold.</p>
         <br>
         This is the Way ✌🏻🕊️
         """
@@ -102,7 +104,7 @@ def send_mail(symbol, threshold, currentPrice, subscriber_email,email_type="pric
     print(f"Email sent successfully to {subscriber_email}")
     
 # function to send message
-def send_message(symbol, threshold, currentPrice, subscriber_number,msg_type="price_update"):
+def send_message(symbol, threshold, currentPrice, subscriber_number,frequency,msg_type="price_update"):
     # set up twilio api
     client = Client(TWILIO_SID,TWILIO_AUTH_TOKEN)
     # message when price is updated and exceeds threshold
@@ -110,28 +112,99 @@ def send_message(symbol, threshold, currentPrice, subscriber_number,msg_type="pr
         message = client.messages.create(
             from_=TWILIO_NUMBER,
             body=f"Current Price of {symbol} is {currentPrice}. It has crossed the threshold value of {threshold} set by you.\n~ This is the Way",
-            to='+977'+subscriber_number  
+            to=subscriber_number  
         )
     # Default message when user adds new entry
     elif msg_type == "new_entry":
         message = client.messages.create(
             from_=TWILIO_NUMBER,
-            body=f"Dear Customer, you have successfully added subscription for {symbol}. Your current price threshold is {threshold}. You will get notified if the current price exceeds this threshold.\n~ This is the Way",
-            to='+977'+subscriber_number  
+            body=f"Dear Customer, you have successfully added {frequency} subscription for {symbol}. Your current price threshold is {threshold}. You will get notified if the current price exceeds this threshold.\n~ This is the Way",
+            to=subscriber_number  
         )
     print(f"Message sent successfully to {subscriber_number}")
 
 # function to send notification
-def send_notification(symbol,threshold,currentPrice,subscriber_email,subscriber_number,notification_mode="email",notification_type="price_update"):
+def send_notification(symbol,threshold,currentPrice,subscriber_email,subscriber_number,frequency,notification_mode="email",notification_type="price_update"):
     if notification_mode == "email":
         # send email for new entry
-        send_mail(symbol,threshold,currentPrice,subscriber_email,notification_type)
+        send_mail(symbol,threshold,currentPrice,subscriber_email,frequency,notification_type)
     elif notification_mode == "text-msg":
         # send message for new entry
-        send_message(symbol,threshold,currentPrice,subscriber_number,notification_type)
+        send_message(symbol,threshold,currentPrice,subscriber_number,frequency,notification_type)
 
+# connecting to database 
+def get_db_connection():
+    conn = sqlite3.connect('database.db')
+    conn.row_factory = sqlite3.Row
+    return conn
 
-# def schedule(frequency):
-#     if frequency == "minutely":
-#         schedule.every(1).minutes.do(main)
+# add new user to database
+def add_user(email,phone_number,symbol,threshold,frequency,notification_mode):
+    conn = get_db_connection()
+    conn.execute("INSERT INTO subscribers (email,phone_number,symbol,threshold,frequency,notification_mode) VALUES (?,?,?,?,?,?)", (email,phone_number,symbol,threshold,frequency,notification_mode))
+    conn.commit()
+    conn.close()
+    print("New Subscriber Added")
+
+# fetch all existing users from database
+def get_users(subscribe_mode="minutely"):
+    conn = get_db_connection() 
+    minutely_subscribers = conn.execute('SELECT * FROM subscribers WHERE frequency="minute"').fetchall()
+    hourly_subscribers = conn.execute('SELECT * FROM subscribers WHERE frequency="hour"').fetchall()
+    daily_subscribers = conn.execute('SELECT * FROM subscribers WHERE frequency="day"').fetchall()
+    conn.close()
+    print(f"There are {len(minutely_subscribers)} minutely subscribers currently")
+    print(f"There are {len(hourly_subscribers)} hourly subscribers currently")
+    print(f"There are {len(daily_subscribers)} daily subscribers currently")
+    if subscribe_mode == "minutely":
+        return minutely_subscribers
+    elif subscribe_mode == "hourly":
+        return hourly_subscribers
+    elif subscribe_mode == "daily":
+        return daily_subscribers
+
+# notify the current subscribers
+def notify_subscribers(subscribers):
+    for subscriber in subscribers:
+        currentPrice = fetch_data(subscriber['symbol'])
+        if currentPrice > subscriber['threshold']:
+            send_notification(subscriber['symbol'],subscriber['threshold'],currentPrice,subscriber['email'],subscriber['phone_number'],subscriber['frequency'],notification_mode=subscriber['notification_mode'],notification_type="price_update")
+    print("Done")
+
+# notify subscribers based on their frequency
+def notify_minutely_subscriber():
+    print("Notifying minutely subscriber at", datetime.now())
+    minutely_subscribers = get_users("minutely")
+    if len(minutely_subscribers) > 0:
+        notify_subscribers(minutely_subscribers)
+        print(f"Notified {len(minutely_subscribers)} subscribers")
+    else:
+        print("No minutely subscribers yet!")
+
+def notify_hourly_subscriber():
+    print("Notifying hourly subscriber at", datetime.now())
+    hourly_subscribers = get_users("hourly")
+    if len(hourly_subscribers) > 0:
+        notify_subscribers(hourly_subscribers)
+        print(f"Notified {len(hourly_subscribers)} subscribers")
+    else:
+        print("No hourly subscribers yet!")
+
+def notify_daily_subscriber():
+    print("Notifying daily subscriber at", datetime.now())
+    daily_subscribers = get_users("daily")
+    if len(daily_subscribers) > 0:
+        notify_subscribers(daily_subscribers)
+        print(f"Notified {len(daily_subscribers)} subscribers")
+    else:
+        print("No daily subscribers yet!")
+
+# for scheduling notification
+def schedule_notification():
+    schedule.every().minute.do(notify_minutely_subscriber)
+    schedule.every(1).hour.do(notify_hourly_subscriber)
+    schedule.every().day.at("08:00").do(notify_daily_subscriber)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
     
