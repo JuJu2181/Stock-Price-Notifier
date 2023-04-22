@@ -1,6 +1,7 @@
 # This file will contain some globally used constants and variables
 import os
 # For importing data from .env file
+# I am not using dotenv package as there was pip install error while installing it
 with open('.env', 'r') as f:
     for line in f:
         # Ignore empty lines and comments

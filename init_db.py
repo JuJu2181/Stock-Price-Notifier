@@ -1,4 +1,4 @@
-# For creating database for subscription entries
+# For creating database for subscription entries and intializing it with some values
 import sqlite3
 
 connection = sqlite3.connect('database.db')

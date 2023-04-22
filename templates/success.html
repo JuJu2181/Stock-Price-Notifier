@@ -8,7 +8,7 @@
     <p class="success-msg">
         You have successfully subscribed to the stock price notifier for the stock "{{ result.symbol }}". You will receive an email when the price of the {{ result.symbol }} stock rises above {{ result.threshold }}.
     </p>
-    <a href="{{ url_for('index') }}" class="back-btn">Back To Home</a>
+    <a href="{{ url_for('blueprint.index') }}" class="back-btn">Back To Home</a>
     </div>    
     <table>
         <h2 class="title">Active Subscribers</h2>

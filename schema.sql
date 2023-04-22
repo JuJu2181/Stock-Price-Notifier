@@ -1,3 +1,4 @@
+-- Schema for the subscribers table
 DROP TABLE IF EXISTS subscribers;
 
 CREATE TABLE subscribers(

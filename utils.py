@@ -20,7 +20,10 @@ import sqlite3
 # for regex
 import re 
 
-# function to fetch data from api
+##################################### 
+##   Data ingestion Functions      ##
+#####################################
+# function to fetch data from api (Optional)
 def fetch_data_from_api(symbol="TSLA"):
     # API endpoint
     url = "https://apidojo-yahoo-finance-v1.p.rapidapi.com/stock/v3/get-historical-data"
@@ -47,7 +50,7 @@ def fetch_data_from_api(symbol="TSLA"):
     # print(df_price.head())
     return df_price
 
-# function to fetch data using yfinance
+# function to fetch data using yfinance (I used this)
 def fetch_data(symbol="TSLA"):
     msft = yf.Ticker(symbol)
     # getting ome price details from this response 
@@ -70,6 +73,10 @@ def fetch_data(symbol="TSLA"):
     # returning only the current price for further processing
     return currentPrice
     
+##################################### 
+##         Validation Functions    ##
+#####################################
+
 # function to check if the ticker exists or not
 def check_ticker_exists(symbol):
     try:
@@ -78,7 +85,8 @@ def check_ticker_exists(symbol):
         return True
     except:
         return False 
-
+    
+# To validate if the email exists or not
 def validate_email(email):
     # Email regex pattern
     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
@@ -89,9 +97,10 @@ def validate_email(email):
     else:
         return False
     
+# To validate if the phone number exists or not
 def validate_number(number):
     # Phone number regex pattern
-    phone_number_pattern = r'^\+\d{1,3}-\d{10}$'
+    phone_number_pattern = r'^\+\d{1,3}\d{10}$'
 
     # Check if phone number matches pattern
     if re.match(phone_number_pattern, number):
@@ -99,14 +108,19 @@ def validate_number(number):
     else:
         return False
     
+# To validate if the price is valid number or not
 def validate_price(price):
     try:
         price = float(price)
         return True 
     except:
         return False
+    
+##################################### 
+##         Email/Text Messaging    ##
+#####################################
 
-# function to send notification
+# function to send email
 def send_mail(symbol, threshold, currentPrice, subscriber_email, frequency, email_type="price_update"):
     try:
         # sender's email
@@ -180,6 +194,11 @@ def send_notification(symbol,threshold,currentPrice,subscriber_email,subscriber_
         # send message for new entry
         send_message(symbol,threshold,currentPrice,subscriber_number,frequency,notification_type)
 
+
+##################################### 
+##         DATABASE Functions      ##
+#####################################
+
 # connecting to database 
 def get_db_connection():
     conn = sqlite3.connect('database.db')
@@ -197,7 +216,7 @@ def add_user(email,phone_number,symbol,threshold,frequency,notification_mode):
 # fetch all existing users from database
 def get_users(subscribe_mode="minutely"):
     conn = get_db_connection() 
-    all_subscribers = conn.execute('SELECT * FROM subscribers').fetchall()
+    all_subscribers = conn.execute('SELECT * FROM subscribers ORDER BY created DESC').fetchall()
     minutely_subscribers = conn.execute('SELECT * FROM subscribers WHERE frequency="minute"').fetchall()
     hourly_subscribers = conn.execute('SELECT * FROM subscribers WHERE frequency="hour"').fetchall()
     daily_subscribers = conn.execute('SELECT * FROM subscribers WHERE frequency="day"').fetchall()
@@ -214,6 +233,11 @@ def get_users(subscribe_mode="minutely"):
     elif subscribe_mode == "all":
         return all_subscribers
 
+
+##################################### 
+##SEND NOTIFICATIONS USING SCHEDULE##
+#####################################
+
 # notify the current subscribers
 def notify_subscribers(subscribers):
     for subscriber in subscribers:
@@ -222,7 +246,7 @@ def notify_subscribers(subscribers):
             send_notification(subscriber['symbol'],subscriber['threshold'],currentPrice,subscriber['email'],subscriber['phone_number'],subscriber['frequency'],notification_mode=subscriber['notification_mode'],notification_type="price_update")
     print("Done")
 
-# notify subscribers based on their frequency
+# function to notify subscribers based on their frequency
 def notify_minutely_subscriber():
     print("Notifying minutely subscriber at", datetime.now())
     minutely_subscribers = get_users("minutely")
@@ -232,6 +256,7 @@ def notify_minutely_subscriber():
     else:
         print("No minutely subscribers yet!")
 
+# function to notify hourly subscriber
 def notify_hourly_subscriber():
     print("Notifying hourly subscriber at", datetime.now())
     hourly_subscribers = get_users("hourly")
@@ -241,6 +266,7 @@ def notify_hourly_subscriber():
     else:
         print("No hourly subscribers yet!")
 
+# function to notify daily subscriber
 def notify_daily_subscriber():
     print("Notifying daily subscriber at", datetime.now())
     daily_subscribers = get_users("daily")
