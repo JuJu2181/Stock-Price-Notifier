@@ -17,6 +17,8 @@ import yfinance as yf
 from twilio.rest import Client
 # for database 
 import sqlite3
+# for regex
+import re 
 
 # function to fetch data from api
 def fetch_data_from_api(symbol="TSLA"):
@@ -68,60 +70,106 @@ def fetch_data(symbol="TSLA"):
     # returning only the current price for further processing
     return currentPrice
     
+# function to check if the ticker exists or not
+def check_ticker_exists(symbol):
+    try:
+        msft = yf.Ticker(symbol)
+        data = msft.info
+        return True
+    except:
+        return False 
+
+def validate_email(email):
+    # Email regex pattern
+    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+
+    # Check if email matches pattern
+    if re.match(email_pattern, email):
+        return True
+    else:
+        return False
+    
+def validate_number(number):
+    # Phone number regex pattern
+    phone_number_pattern = r'^\+\d{1,3}-\d{10}$'
+
+    # Check if phone number matches pattern
+    if re.match(phone_number_pattern, number):
+        return True
+    else:
+        return False
+    
+def validate_price(price):
+    try:
+        price = float(price)
+        return True 
+    except:
+        return False
+
 # function to send notification
 def send_mail(symbol, threshold, currentPrice, subscriber_email, frequency, email_type="price_update"):
-    # sender's email
-    sender = SENDER_MAIL
-    # receiver's email
-    recipients = [subscriber_email]
-    # Email Content 
-    if email_type == "price_update":
-        subject = f"Stock Price Alert for {symbol}"
-        body = f"""
-        <h2> Notification for {symbol} </h2>
-        <p>Current Price of {symbol} is {currentPrice}. It has crossed the threshold value of {threshold} set by you.</p>
-        <br>
-        This is the Way ✌🏻🕊️
-        """
-    elif email_type == "new_entry":
-        subject = f"Subscription Added for {symbol}"
-        body = f"""
-        <p>Dear Customer, you have successfully added {frequency} subscription for {symbol}. Your current price threshold is {threshold}. You will get notified if the current price exceeds this threshold.</p>
-        <br>
-        This is the Way ✌🏻🕊️
-        """
-    # using MIME on body to send html content
-    msg = MIMEText(body, 'html')
-    msg['Subject'] = subject
-    msg['From'] = sender
-    # for sending to multiple recipients
-    msg['To'] = ', '.join(recipients)
-    # Setup SMTP server 
-    smtp_server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-    smtp_server.login(SENDER_MAIL,SENDER_PWD)
-    smtp_server.sendmail(sender,recipients,msg.as_string())
-    smtp_server.quit()
-    print(f"Email sent successfully to {subscriber_email}")
+    try:
+        # sender's email
+        sender = SENDER_MAIL
+        # receiver's email
+        recipients = [subscriber_email]
+        # Email Content 
+        if email_type == "price_update":
+            subject = f"Stock Price Alert for {symbol}"
+            body = f"""
+            <h2> Notification for {symbol} </h2>
+            <p>Current Price of {symbol} is {currentPrice}. It has crossed the threshold value of {threshold} set by you.</p>
+            <br>
+            This is the Way ✌🏻🕊️
+            """
+        elif email_type == "new_entry":
+            subject = f"Subscription Added for {symbol}"
+            body = f"""
+            <p>Dear Customer, you have successfully added {frequency} subscription for {symbol}. Your current price threshold is {threshold}. You will get notified if the current price exceeds this threshold.</p>
+            <br>
+            This is the Way ✌🏻🕊️
+            """
+        # using MIME on body to send html content
+        msg = MIMEText(body, 'html')
+        msg['Subject'] = subject
+        msg['From'] = sender
+        # for sending to multiple recipients
+        msg['To'] = ', '.join(recipients)
+        # Setup SMTP server 
+        smtp_server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        smtp_server.login(SENDER_MAIL,SENDER_PWD)
+        smtp_server.sendmail(sender,recipients,msg.as_string())
+        smtp_server.quit()
+        print(f"Email sent successfully to {subscriber_email}")
+    except Exception as e:
+        print(f"Error sending email to {subscriber_email}")
+        print(f"Following Exception Occured: ")
+        print(e)
     
 # function to send message
 def send_message(symbol, threshold, currentPrice, subscriber_number,frequency,msg_type="price_update"):
-    # set up twilio api
-    client = Client(TWILIO_SID,TWILIO_AUTH_TOKEN)
-    # message when price is updated and exceeds threshold
-    if msg_type == "price_update":
-        message = client.messages.create(
-            from_=TWILIO_NUMBER,
-            body=f"Current Price of {symbol} is {currentPrice}. It has crossed the threshold value of {threshold} set by you.\n~ This is the Way",
-            to=subscriber_number  
-        )
-    # Default message when user adds new entry
-    elif msg_type == "new_entry":
-        message = client.messages.create(
-            from_=TWILIO_NUMBER,
-            body=f"Dear Customer, you have successfully added {frequency} subscription for {symbol}. Your current price threshold is {threshold}. You will get notified if the current price exceeds this threshold.\n~ This is the Way",
-            to=subscriber_number  
-        )
-    print(f"Message sent successfully to {subscriber_number}")
+    try:
+        # set up twilio api
+        client = Client(TWILIO_SID,TWILIO_AUTH_TOKEN)
+        # message when price is updated and exceeds threshold
+        if msg_type == "price_update":
+            message = client.messages.create(
+                from_=TWILIO_NUMBER,
+                body=f"Current Price of {symbol} is {currentPrice}. It has crossed the threshold value of {threshold} set by you.\n~ This is the Way",
+                to=subscriber_number  
+            )
+        # Default message when user adds new entry
+        elif msg_type == "new_entry":
+            message = client.messages.create(
+                from_=TWILIO_NUMBER,
+                body=f"Dear Customer, you have successfully added {frequency} subscription for {symbol}. Your current price threshold is {threshold}. You will get notified if the current price exceeds this threshold.\n~ This is the Way",
+                to=subscriber_number  
+            )
+        print(f"Message sent successfully to {subscriber_number}")
+    except Exception as e:
+        print(f"Error sending email to {subscriber_number}")
+        print(f"Following Exception Occured: ")
+        print(e)
 
 # function to send notification
 def send_notification(symbol,threshold,currentPrice,subscriber_email,subscriber_number,frequency,notification_mode="email",notification_type="price_update"):
@@ -149,6 +197,7 @@ def add_user(email,phone_number,symbol,threshold,frequency,notification_mode):
 # fetch all existing users from database
 def get_users(subscribe_mode="minutely"):
     conn = get_db_connection() 
+    all_subscribers = conn.execute('SELECT * FROM subscribers').fetchall()
     minutely_subscribers = conn.execute('SELECT * FROM subscribers WHERE frequency="minute"').fetchall()
     hourly_subscribers = conn.execute('SELECT * FROM subscribers WHERE frequency="hour"').fetchall()
     daily_subscribers = conn.execute('SELECT * FROM subscribers WHERE frequency="day"').fetchall()
@@ -162,6 +211,8 @@ def get_users(subscribe_mode="minutely"):
         return hourly_subscribers
     elif subscribe_mode == "daily":
         return daily_subscribers
+    elif subscribe_mode == "all":
+        return all_subscribers
 
 # notify the current subscribers
 def notify_subscribers(subscribers):

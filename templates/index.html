@@ -3,39 +3,46 @@
 {%block title%}Home{%endblock%}
 
 {%block content%}
-            <form action="/add_subscription" class="stock-form" method="POST">
-                <h1 class="title">Stock Price Notifier</h1>
-                <div class="form-group">
-                    <label for="subscriber-email" class="form-header">Email Address:</label>
-                    <input type="text" id="subscriber-email" name="subscriber-email" placeholder="user@mail.com">
+<form action="/add_subscription" class="stock-form" method="POST">
+    <h1 class="title">Stock Price Notifier</h1>
+    <div class="form-group">
+        <label for="subscriber-email" class="form-header">Email Address:</label>
+                    <input type="text" id="subscriber-email" name="subscriber-email" placeholder="user@mail.com" required>
                 </div>
                 <div class="form-group">
                     <label for="subscriber-phone" class="form-header">Mobile Number:</label>
-                    <input type="text" id="subscriber-phone" name="subscriber-phone" placeholder="+977-XXXXXXXXXX">
+                    <input type="text" id="subscriber-phone" name="subscriber-phone" placeholder="+977-XXXXXXXXXX" required>
                 </div>
                 <div class="form-group">
                     <label for="stock-ticker-symbol" class="form-header">Stock ticker symbol:</label>
-                    <input type="text" id="stock-ticker-symbol" name="stock-ticker-symbol" value="TSLA">
+                    <input type="text" id="stock-ticker-symbol" name="stock-ticker-symbol" value="TSLA" required>
                 </div>
                 <div class="form-group">
                     <label for="price-threshold" class="form-header">Stock price threshold:</label>
-                    <input type="text" id="price-threshold" name="price-threshold" value="100">
+                    <input type="text" id="price-threshold" name="price-threshold" value="100" required>
                 </div>
                 <div class="form-group">
-                <label for="frequency" class="form-header">Notification frequency:</label>
-                <select id="frequency" name="frequency">
-                    <option value="minute">Minutely</option>
-                    <option value="hour">Hourly</option>
-                    <option value="day">Daily</option>
-                </select>
+                    <label for="frequency" class="form-header">Notification frequency:</label>
+                    <select id="frequency" name="frequency">
+                        <option value="minute">Minutely</option>
+                        <option value="hour">Hourly</option>
+                        <option value="day">Daily</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                <label for="notification-mode" class="form-header">Notification Mode:</label>
-                <select id="notification-mode" name="notification-mode">
-                    <option value="email">Email</option>
-                    <option value="text-msg">Text Message</option>
-                </select>
+                    <label for="notification-mode" class="form-header">Notification Mode:</label>
+                    <select id="notification-mode" name="notification-mode">
+                        <option value="email">Email</option>
+                        <option value="text-msg">Text Message</option>
+                    </select>
                 </div>
                 <button type="submit" class="submit-btn">Get Notified</button>
             </form>
-{%endblock%}
+            {% if error %}
+            <div class="error-msg">
+                {{ error }}
+            </div>
+            {%endif%}
+
+            {%endblock%}
+            

@@ -10,4 +10,29 @@
     </p>
     <a href="{{ url_for('index') }}" class="back-btn">Back To Home</a>
     </div>    
+    <table>
+        <h2 class="title">Active Subscribers</h2>
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Phone Number</th>
+                <th>Symbol</th>
+                <th>Threshold</th>
+                <th>Frequency</th>
+                <th>Notification Mode</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subscriber in result['subscribers'] %}
+            <tr>
+                <td>{{subscriber['email']}}</td>
+                <td>{{subscriber['phone_number']}}</td>
+                <td>{{subscriber['symbol']}}</td>
+                <td>{{subscriber['threshold']}}</td>
+                <td>{{subscriber['frequency']}}</td>
+                <td>{{subscriber['notification_mode']}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {%endblock%}
