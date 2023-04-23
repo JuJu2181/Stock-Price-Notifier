@@ -32,3 +32,15 @@ https://user-images.githubusercontent.com/43902648/233772114-beb452c7-b005-41ab-
 ### Mobile Notifications
 ![New entry](screenshots/mobile_ss2.jpg)
 ![Stock Alert](screenshots/mobile_ss1.jpg)
+
+## Project Directory Structure
+- controllers: controller file
+- models: code for connecting to database and utlities function
+- routes: routes file
+- screenshots: screenshots for readme
+- static: css file
+- templates: html files
+- main.py: main python file
+- database.db: sqlite database
+- Description.md: Task description
+

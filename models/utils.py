@@ -244,7 +244,6 @@ def notify_subscribers(subscribers):
         currentPrice = fetch_data(subscriber['symbol'])
         if currentPrice > subscriber['threshold']:
             send_notification(subscriber['symbol'],subscriber['threshold'],currentPrice,subscriber['email'],subscriber['phone_number'],subscriber['frequency'],notification_mode=subscriber['notification_mode'],notification_type="price_update")
-    print("Done")
 
 # function to notify subscribers based on their frequency
 def notify_minutely_subscriber():
